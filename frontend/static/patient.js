@@ -21,7 +21,9 @@ let finalTranscript = "";
 
 function applyResult(data) {
   transcriptEl.textContent = data.transcript || "(boş)";
-  if (data.detected && data.measurement) {
+  const okMulti = data.detected && data.measurements && data.measurements.length > 0;
+  const okSingle = data.detected && data.measurement;
+  if (okMulti || okSingle) {
     detectedEl.innerHTML = `<span class="detected">✓ ${data.message}</span>`;
   } else {
     detectedEl.innerHTML = `<span class="error">✗ ${data.message || "Anlaşılamadı"}</span>`;

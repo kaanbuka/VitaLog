@@ -41,6 +41,9 @@ def _strip_accents(text: str) -> str:
 
 def _normalize(text: str) -> str:
     text = text.lower()
+    # Türkçe "13'e 9" → rakamlar ayrı kelime olarak çıksın diye kesme işaretini boşluk yap
+    for ch in "\u2019\u2018'ʼ":
+        text = text.replace(ch, " ")
     # Turkish-specific replacements before generic accent strip
     repl = str.maketrans({"ı": "i", "İ": "i", "ş": "s", "ğ": "g", "ü": "u", "ö": "o", "ç": "c"})
     text = text.translate(repl)
@@ -150,6 +153,13 @@ _KEYWORDS: dict[str, str] = {
     "kilo": "weight", "kilom": "weight", "agirlik": "weight",
 }
 
+# Çoklu ölçüm: soldan sağa hangi anahtar kelime önce gelirse (önce uzun / spesifik)
+_KEYWORD_PRIORITY: list[str] = [
+    "tansiyon", "tansiyonum", "buyuk", "glikoz", "glukoz",
+    "seker", "sekerim", "kan", "nabiz", "nabzim", "kalp",
+    "kilo", "kilom", "agirlik",
+]
+
 
 @dataclass
 class ParsedMeasurement:
@@ -166,14 +176,9 @@ class ParsedMeasurement:
 
 
 def _detect_type(norm_text: str) -> Optional[str]:
-    """Match a keyword as a substring of any token (so 'sekerim', 'glikozum',
-    'tansiyonum', 'nabzim', 'kilom' all map to their root)."""
+    """İlk eşleşen anahtar kelime türünü döndür (tek parça metin için)."""
     tokens = norm_text.split()
-    # Order matters: more specific keys (e.g. "tansiyon") before shorter ones.
-    priority = ["tansiyon", "tansiyonum", "buyuk", "glikoz", "glukoz",
-                "seker", "sekerim", "kan", "nabiz", "nabzim", "kalp",
-                "kilo", "kilom", "agirlik"]
-    for kw in priority:
+    for kw in _KEYWORD_PRIORITY:
         if kw not in _KEYWORDS:
             continue
         for tok in tokens:
@@ -182,36 +187,76 @@ def _detect_type(norm_text: str) -> Optional[str]:
     return None
 
 
-def parse_measurement(text: str) -> Optional[ParsedMeasurement]:
-    """Parse a Turkish phrase into a measurement record. Returns None on failure."""
-    if not text:
-        return None
-    norm = _normalize(text)
-    mtype = _detect_type(norm)
-    if mtype is None:
-        return None
+def _match_type_from_token(tok: str) -> Optional[str]:
+    """Tek tokende ölçüm anahtar kelimesi var mı (çoklu ölçüm dilimleme)."""
+    for kw in _KEYWORD_PRIORITY:
+        if kw in tok:
+            return _KEYWORDS[kw]
+    return None
 
-    nums = _extract_numbers(norm)
+
+def _measurement_from_nums(mtype: str, nums: list[float]) -> Optional[ParsedMeasurement]:
     if not nums:
         return None
-
     if mtype == "bp":
         if len(nums) >= 2:
             sys_, dia = nums[0], nums[1]
         else:
-            # "tansiyonum on iki sekiz" might be parsed as a single 128 → split.
             n = nums[0]
             if n > 30 and n < 1000:
-                sys_, dia = round(n // 10) * 10 / 10, n % 10  # rare; fallback
-                if dia < 5:  # implausible diastolic, give up
+                sys_, dia = round(n // 10) * 10 / 10, n % 10
+                if dia < 5:
                     return None
             else:
                 return None
-        # Heuristic: if user said "on iki sekiz" the parser yields [12, 8]; multiply.
         if sys_ < 30:
             sys_ *= 10
-        if dia < 30 and dia >= 4:  # 4..29 → diastolic in tens (e.g. 8 → 80)
+        if dia < 30 and dia >= 4:
             dia *= 10
         return ParsedMeasurement(type="bp", value1=sys_, value2=dia)
-
     return ParsedMeasurement(type=mtype, value1=nums[0])
+
+
+def _parse_typed_segment(norm_segment: str, mtype: str) -> Optional[ParsedMeasurement]:
+    nums = _extract_numbers(norm_segment)
+    return _measurement_from_nums(mtype, nums)
+
+
+def _parse_single_normalized(norm: str) -> Optional[ParsedMeasurement]:
+    """Tek ölçüm cümlesi (eski davranış)."""
+    mtype = _detect_type(norm)
+    if mtype is None:
+        return None
+    nums = _extract_numbers(norm)
+    return _measurement_from_nums(mtype, nums)
+
+
+def parse_all_measurements(text: str) -> list[ParsedMeasurement]:
+    """Metinde birden çok ölçüm varsa hepsini çıkar (ör. şeker + tansiyon + nabız + kilo)."""
+    if not text.strip():
+        return []
+    norm = _normalize(text)
+    tokens = norm.split()
+    hits: list[tuple[int, str]] = []
+    for i, tok in enumerate(tokens):
+        mt = _match_type_from_token(tok)
+        if mt is not None:
+            hits.append((i, mt))
+    if not hits:
+        single = _parse_single_normalized(norm)
+        return [single] if single else []
+
+    out: list[ParsedMeasurement] = []
+    for hi, (start_idx, mtype) in enumerate(hits):
+        end_idx = hits[hi + 1][0] if hi + 1 < len(hits) else len(tokens)
+        segment = " ".join(tokens[start_idx:end_idx])
+        pm = _parse_typed_segment(segment, mtype)
+        if pm:
+            out.append(pm)
+    return out
+
+
+def parse_measurement(text: str) -> Optional[ParsedMeasurement]:
+    """Tek ölçüm (geriye dönük uyumluluk): çoklu metinde ilk ölçüm."""
+    allp = parse_all_measurements(text)
+    return allp[0] if allp else None

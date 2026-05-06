@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from app.services.parser import ParsedMeasurement, parse_measurement
+from app.services.parser import ParsedMeasurement, parse_all_measurements, parse_measurement
 
 
 @pytest.mark.parametrize(
@@ -49,3 +49,13 @@ def test_parse_measurement_ok(
 )
 def test_parse_measurement_rejects(phrase: str) -> None:
     assert parse_measurement(phrase) is None
+
+
+def test_parse_all_in_one_sentence() -> None:
+    phrase = "şekerim 140 Tansiyonum 13'e 9 nabzım 75 kilom 58"
+    parts = parse_all_measurements(phrase)
+    assert len(parts) == 4
+    assert parts[0].type == "sugar" and parts[0].value1 == 140
+    assert parts[1].type == "bp" and parts[1].value1 == 130 and parts[1].value2 == 90
+    assert parts[2].type == "pulse" and parts[2].value1 == 75
+    assert parts[3].type == "weight" and parts[3].value1 == 58

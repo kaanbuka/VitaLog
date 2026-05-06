@@ -23,9 +23,16 @@ class MeasurementOut(BaseModel):
 
 class VoiceResult(BaseModel):
     transcript: str
-    measurement: Optional[MeasurementOut] = None
+    measurement: Optional[MeasurementOut] = Field(
+        default=None,
+        description="Geriye dönük uyumluluk: son kayıt veya tek ölçüm.",
+    )
+    measurements: list[MeasurementOut] = Field(
+        default_factory=list,
+        description="Bu istekte kaydedilen tüm ölçümler (çoklu ifade).",
+    )
     detected: bool = Field(
         default=False,
-        description="Parser metinden ölçüm çıkardıysa True.",
+        description="En az bir ölçüm çıkarıldıysa True.",
     )
     message: str = ""
