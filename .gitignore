@@ -1,0 +1,17 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+
+# Env / local DB (keep .env.example tracked)
+.env
+
+# VitaLog runtime data (SQLite + uploaded audio)
+data/*.db
+data/audio/
+
+# OS
+.DS_Store
