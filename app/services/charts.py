@@ -1,4 +1,7 @@
-"""Matplotlib trend grafikleri ve doktor paneli için JSON özet."""
+"""Matplotlib trend grafikleri ve doktor paneli için JSON özet.
+
+Skills Agent (şartname §5.2): çok metrikli zaman serisi ve referans bantları.
+"""
 from __future__ import annotations
 
 from collections import defaultdict

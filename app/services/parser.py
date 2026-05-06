@@ -1,9 +1,9 @@
-"""Turkish measurement parser.
+"""Türkçe ölçüm metni ayrıştırıcı.
 
-Goal: Given a transcript like "Şekerim yüz otuz beş" or "tansiyon 12 8",
-return a structured measurement.
+Skills Agent (şartname §5.2): Türkçe sözcük sayıları ve ölçüm türü anahtar
+kelimeleri için uzman gözden geçirme ve kenar durumlar burada yoğunlaşır.
 
-Person A — extend this file with more synonyms and edge cases as needed.
+Örnek: "Şekerim yüz otuz beş", "tansiyon on iki sekiz".
 """
 from __future__ import annotations
 

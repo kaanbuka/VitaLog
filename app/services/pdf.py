@@ -1,4 +1,7 @@
-"""Tek sayfalık doktor PDF'i: başlık, özet tablo, gömülü trend grafiği."""
+"""Tek sayfalık doktor PDF'i: başlık, özet tablo, gömülü trend grafiği.
+
+Skills Agent (şartname §5.2): ReportLab düzeni ve grafik gömme.
+"""
 from __future__ import annotations
 
 from datetime import datetime
