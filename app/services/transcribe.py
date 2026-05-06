@@ -1,22 +1,9 @@
-"""Optional server-side speech-to-text (only used by /voice).
+"""İsteğe bağlı sunucu tarafı STT (yalnızca /voice).
 
-The default VitaLog flow performs STT in the user's browser (Web Speech API,
-free, no key) and POSTs the recognized text to /text — so this module is
-**not required** for normal operation.
+Varsayılan VitaLog akışı: tarayıcı Web Speech → metin → POST /text (API anahtarı yok).
 
-If you want to also accept raw audio uploads at /voice, two free/paid options
-are supported, in order of preference:
-
-1. **OpenAI Whisper API** — set ``OPENAI_API_KEY`` in ``.env`` (paid, accurate).
-2. **faster-whisper (local, free, offline)** — install with::
-
-       pip install faster-whisper
-
-   Set ``LOCAL_WHISPER_MODEL`` (default ``small``). First run downloads the
-   model (~150 MB for ``small``, ~75 MB for ``base``).
-
-If neither is available we fall back to the original upload filename — just
-enough to keep the pipeline testable without any STT setup.
+Skills Agent (şartname §5.2): Harici STT (Whisper API / faster-whisper) ve geri
+dönüş (dosya adından metin) stratejisi burada ele alınır.
 """
 from __future__ import annotations
 

@@ -133,4 +133,11 @@ Aşağıdaki maddeler ayrı **GitHub Issue** olarak açılmalı ve numaraları b
 
 ---
 
+## 10. Hakem değerlendirme formu ile çapraz kontrol
+
+Resmi puanlama maddeleri ve depodaki kanıtların eşlemesi: **`HAKEM_UYUMU.md`**.  
+AI izlenebilirlik özeti: **`AI_TRACEABILITY.md`**.
+
+---
+
 *Bu dosya SolveX AI Hackathon 2026 Teknik Uygulama Şartnamesi’nde tanımlanan **Plan Agent** rolü kapsamında üretilmiş ve repoda saklanmıştır.*
