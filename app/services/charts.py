@@ -15,6 +15,15 @@ matplotlib.use("Agg")
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 
+# Türkçe etiketler (Şeker, Nabız, …) için Unicode uyumlu font
+plt.rcParams.update(
+    {
+        "font.family": "sans-serif",
+        "font.sans-serif": ["DejaVu Sans", "DejaVu Sans Mono", "sans-serif"],
+        "axes.unicode_minus": False,
+    }
+)
+
 from app.models import Measurement
 
 _LABELS = {
