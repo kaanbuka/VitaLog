@@ -29,8 +29,10 @@ def test_post_text_parses_sugar(client: TestClient) -> None:
     assert r.status_code == 200
     body = r.json()
     assert body.get("detected") is True
+    assert body.get("measurements")
+    assert len(body["measurements"]) >= 1
     assert body.get("measurement") is not None
-    assert body["measurement"]["type"] == "sugar"
+    assert body["measurements"][-1]["type"] == "sugar"
 
 
 def test_report_json_returns_summary(client: TestClient) -> None:
