@@ -5,20 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>VitaLog — Doktor Paneli</title>
     <link rel="stylesheet" href="/static/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   </head>
   <body>
     <header>
       <div>
         <h1>VitaLog — Doktor Paneli</h1>
-        <div class="sub">Hastanın takip özeti (alanlar sonraki adımlarda doldurulacak).</div>
+        <div class="sub">Hastanın 1 aylık takip raporu</div>
       </div>
+      <a href="/" class="muted">← Hasta arayüzü</a>
     </header>
+
     <main>
       <section class="card">
-        <p class="muted" style="margin: 0">
-          Kontroller, grafikler ve tablo bir sonraki commitlerde eklenecek.
-        </p>
+        <div class="row" style="align-items: flex-end">
+          <label>
+            Hasta ID:
+            <input id="patientId" value="demo" />
+          </label>
+          <label>
+            Dönem (gün):
+            <input id="days" type="number" value="30" min="1" max="365" />
+          </label>
+          <button id="loadBtn" type="button" class="primary">Yükle</button>
+          <a
+            id="pdfBtn"
+            class="ghost"
+            style="
+              text-decoration: none;
+              display: inline-block;
+              padding: 0.7rem 1.2rem;
+              border-radius: 999px;
+              border: 1px solid #475569;
+              color: var(--text);
+            "
+            href="#"
+            >PDF indir</a
+          >
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="row" id="kpis"></div>
+      </section>
+
+      <section class="card">
+        <h3 style="margin-top: 0">Trend Grafikleri</h3>
+        <div class="row chart-wrap">
+          <div>
+            <h4>Şeker (mg/dL)</h4>
+            <canvas id="chartSugar"></canvas>
+          </div>
+          <div>
+            <h4>Tansiyon (mmHg)</h4>
+            <canvas id="chartBp"></canvas>
+          </div>
+        </div>
+        <div class="row chart-wrap" style="margin-top: 1rem">
+          <div>
+            <h4>Nabız (bpm)</h4>
+            <canvas id="chartPulse"></canvas>
+          </div>
+          <div>
+            <h4>Kilo (kg)</h4>
+            <canvas id="chartWeight"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3 style="margin-top: 0">Tüm ölçümler</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Zaman</th>
+              <th>Tip</th>
+              <th>Değer</th>
+              <th>Ham metin</th>
+            </tr>
+          </thead>
+          <tbody id="all"></tbody>
+        </table>
       </section>
     </main>
+
+    <script src="/static/doctor.js"></script>
   </body>
 </html>
